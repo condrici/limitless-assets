@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Set path to root directory
+# shellcheck disable=SC2164
+SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+cd "${SCRIPT_PATH}" && cd ..
+
+#########################
+# Create ENV files from example files
+#########################
+
+DOCKER_ENV_FILE_EXAMPLE=./.env.example
+DOCKER_ENV_FILE=./.env
+LARAVEL_ENV_FILE_EXAMPLE=./laravel/.env.example
+LARAVEL_ENV_FILE=./laravel/.env
+
+cp $DOCKER_ENV_FILE_EXAMPLE $DOCKER_ENV_FILE
+cp $LARAVEL_ENV_FILE_EXAMPLE $LARAVEL_ENV_FILE
+
+#########################
+# Prepare shared folders
+#########################
+
+# Create synced docker volumes
+mkdir -p docker/volumes/mysql
+
+# Docker needs execute permissions for the entrypoint files
+chmod g+x docker/entrypoint/php-fpm-entrypoint.sh
+

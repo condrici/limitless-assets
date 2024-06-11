@@ -1,0 +1,8 @@
+# Editors
+.editorconfig
+.idea
+.env
+.vscode
+
+# Volumes synced from docker containers
+docker/volumes/*

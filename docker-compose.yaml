@@ -1,0 +1,74 @@
+version: "3"
+
+services:
+
+  # webserver
+  nginx:
+    build:
+      dockerfile: docker/dockerfiles/nginx/Dockerfile
+    container_name: '${COMPOSE_PROJECT_NAME}-nginx'
+    ports:
+      - "${HOST_MACHINE_UNSECURE_HOST_PORT}:80"
+    volumes:
+      # Laravel Project files placed in the Nnginx Public Folder
+      - ./laravel:/var/www/html
+      # Custom Configuration replaces Nginx Default Configuration
+      - ./docker/config/nginx.conf:/etc/nginx/conf.d/default.conf
+      # Expose Nginx logs to host machine
+      - ./docker/volumes/nginx:/var/log/nginx
+    links:
+      - php-fpm
+    networks:
+      - limitless
+
+  # php
+  php-fpm:
+    build:
+      dockerfile: docker/dockerfiles/php/Dockerfile
+    container_name: '${COMPOSE_PROJECT_NAME}-php'
+    entrypoint: /php-fpm-entrypoint.sh
+    volumes:
+      - ./laravel:/var/www/html
+      - ./docker/entrypoint/php-fpm-entrypoint.sh:/php-fpm-entrypoint.sh
+    networks:
+      - limitless
+
+  # mysql
+  mysql:
+    build:
+      dockerfile: docker/dockerfiles/mysql/Dockerfile
+    container_name: '${COMPOSE_PROJECT_NAME}-mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: docker
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+    ports:
+      - "6033:3306"
+    volumes:
+      - ./docker/volumes/mysql/data:/var/lib/mysql
+    networks:
+      limitless:
+        aliases:
+          - mysql
+
+  # phpmyadmin
+  phpmyadmin:
+    build:
+      dockerfile: docker/dockerfiles/phpmyadmin/Dockerfile
+    container_name: '${COMPOSE_PROJECT_NAME}-phpmyadmin'
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "8085:80"
+    networks:
+      limitless:
+        aliases:
+          - phpmyadmin
+
+networks:
+  limitless:
+    driver: bridge
