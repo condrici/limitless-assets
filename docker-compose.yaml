@@ -40,7 +40,7 @@ services:
     container_name: '${COMPOSE_PROJECT_NAME}-mysql'
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: docker
+      MYSQL_DATABASE: limitless_assets
       MYSQL_USER: docker
       MYSQL_PASSWORD: docker
     ports:

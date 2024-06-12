@@ -10,9 +10,11 @@ RUN apt-get update; exit 0
 ########################
 # curl, required to install composer
 # unzip, required for <composer install>
+# mysqli, pdo, pdo_mysql, mysql drivers required for laravel/php to connect to mysql
 ########################
 
 RUN apt-get install curl unzip -y
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php
 RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 RUN rm composer-setup.php
