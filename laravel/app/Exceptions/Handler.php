@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
+use App\Exceptions\ResourceDoesNotExist;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,8 +39,8 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e): JsonResponse
     {
-        if ($e instanceof UpstreamException) {
-            return $this->handleUpstreamException($e);
+        if ($e instanceof ResourceDoesNotExist) {
+            return $this->handleResourceDoesNotExist($e);
         }
 
         $defaultPublicMessage = 'Unknown Exception';
@@ -46,32 +48,18 @@ class Handler extends ExceptionHandler
 
         return response()->json([
             'message' => $defaultPublicMessage
-        ], 500);
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * UpstreamException handling
-     * Logging: both the internal error message and the upstream error message
-     * Outputting: only the internal error message
-     *
-     * @param UpstreamException $exception
-     * @return JsonResponse
-     */
-    private function handleUpstreamException(UpstreamException $exception): JsonResponse
+    public function handleResourceDoesNotExist(ResourceDoesNotExist $exception): JsonResponse
     {
-        $errorMessage = $exception->getMessage();
-        $upstreamErrorMessage = $exception->getPrevious()->getMessage();
+        $errorMessage = "Resource does not exist";
 
-        Log::error(
-            sprintf(
-                "\n---\n Upstream Exception: \n (Internal Error) %s \n (Upstream Error) %s---",
-                $errorMessage, $upstreamErrorMessage
-            )
-        );
+        Log::error($exception->getMessage());
 
         return response()->json([
             'message' => $errorMessage
-        ], 500);
+        ], Response::HTTP_NOT_FOUND);
     }
 
 }
