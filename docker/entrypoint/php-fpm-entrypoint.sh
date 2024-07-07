@@ -2,6 +2,7 @@
 
 COMPOSER_MEMORY_LIMIT=-1 composer install
 
+php artisan migrate
 php artisan key:generate
 php artisan cache:clear
 php artisan config:cache
