@@ -24,3 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/assets', [AssetController::class, 'getAssets']);
+Route::get('/assets/{id}', [AssetController::class, 'getAssetById']);
+Route::post('/assets', [AssetController::class, 'createAsset']);
+Route::delete('/assets/{id}', [AssetController::class, 'deleteAsset']);
+Route::patch('/assets/{id}', [AssetController::class, 'updateAsset']);
