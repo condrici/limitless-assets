@@ -42,11 +42,7 @@ class AssetRepository
 
     public function deleteById(int $id): bool
     {
-        $find = Asset::find($id);
-
-        if ($find !== null) {
-            $find->delete();
-        }
+        Asset::find($id)?->delete();
 
         return true;
     }
