@@ -5,12 +5,22 @@ namespace App\Repository;
 use App\Models\Asset;
 use App\Exceptions\ResourceDoesNotExist;
 use Illuminate\Database\Eloquent\Collection;
+use App\Repository\PaginationTrait;
 
 class AssetRepository
 {
-    public function getFiltered(array $params): Collection
+    public function getFiltered(
+        array $params, 
+        int $page,
+        int $limit
+    ): Collection
     {
-        return Asset::where($params)->get();
+        $offset = ($page -1) * $limit;
+
+        return Asset::where($params)
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
     }
   
     public function getById(int $id): Collection

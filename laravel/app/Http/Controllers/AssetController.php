@@ -18,8 +18,15 @@ class AssetController extends Controller
 
     public function getAssets(Request $request): Response
     {
+        $params = $request->all();
+        $page = $request->query('page') ?? 1;
+        $limit = $request->query('limit') ?? 10;
+
+        unset ($params['limit']);
+        unset ($params['page']);
+
         $assets = $this->assetRepository->getFiltered(
-            $request->all()
+            $params, $page, $limit
         )->toArray();
 
         return $this->generateResponse($assets, Response::HTTP_OK);
