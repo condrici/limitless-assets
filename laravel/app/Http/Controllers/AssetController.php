@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Repository\AssetRepository;
 use Illuminate\Http\RedirectResponse;
+use App\DTO\AssetDTO;
 
 
 class AssetController extends Controller
@@ -44,8 +45,10 @@ class AssetController extends Controller
             'name' => 'required|max:255'
         ]);
 
+        $dto = new AssetDTO($request->all());
+
         $asset = $this->assetRepository->create(
-            $request->all()
+            $dto->toArray()
         )->toArray();
 
         return $this->generateResponse($asset, Response::HTTP_OK);
@@ -63,7 +66,9 @@ class AssetController extends Controller
             'name' => 'required|max:255'
         ]);
 
-        $x = $this->assetRepository->updatePatchById($id, $request->all());
+        $dto = new AssetDTO($request->all());
+
+        $x = $this->assetRepository->updatePatchById($id, $dto->toArray());
         return $this->generateResponse($x->toArray(), Response::HTTP_OK);
     }
 
