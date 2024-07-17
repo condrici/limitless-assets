@@ -60,11 +60,7 @@ class ApiResponseBuilder
     private function reset()
     {
         foreach (get_class_vars(get_class($this)) as $name => $default) {
-            if ($default === false) {
-                unset($this->$name);    
-            } else {
-                $this->$name = $default;
-            }
+            unset($this->$name);
         }
     }
 }
