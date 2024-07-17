@@ -6,8 +6,8 @@ use Illuminate\Http\Response;
 
 class ApiResponseBuilder
 {
-    private ?int $statusCode;
-    private array $data;
+    private int $statusCode;
+    private ?array $data;
     private ?int $totalMeta;
 
     public function withStatusCode(int $statusCode)
