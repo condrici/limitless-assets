@@ -28,25 +28,24 @@ class AssetController extends Controller
         unset ($params['limit']);
         unset ($params['page']);
         
-        $assets = $this->assetRepository->getFiltered(
-            $params, $page, $limit
-        )->toArray();
-
-        $count = $this->assetRepository->getFilteredCount(
-            $params
-        );
+        $assets = $this->assetRepository->getFiltered($params, $page, $limit);
+        $count = $this->assetRepository->getFilteredCount($params);
 
         return $this->apiResponseBuilder
             ->withStatusCode(Response::HTTP_OK)
-            ->withData($assets)
+            ->withData($assets->toArray())
             ->withTotalMeta($count)
             ->build();
     }
 
     public function getAssetById(int $id): Response
     {
-        $assets = $this->assetRepository->getById($id)->toArray();
-        return $this->generateResponse(Response::HTTP_OK, $assets);
+        $assets = $this->assetRepository->getById($id);
+
+        return $this->apiResponseBuilder
+            ->withStatusCode(Response::HTTP_OK)
+            ->withData($assets->toArray())
+            ->build();
     }
 
     public function createAsset(Request $request): Response
@@ -56,18 +55,21 @@ class AssetController extends Controller
         ]);
 
         $dto = new AssetDTO($request->all());
+        $asset = $this->assetRepository->create($dto->toArray());
 
-        $asset = $this->assetRepository->create(
-            $dto->toArray()
-        )->toArray();
-
-        return $this->generateResponse(Response::HTTP_OK, $asset);
+        return $this->apiResponseBuilder
+            ->withStatusCode(Response::HTTP_OK)
+            ->withData($asset->toArray())
+            ->build();
     }
 
     public function deleteAsset(int $id): Response
     {
-        $deleteAsset = $this->assetRepository->deleteById($id);
-        return $this->generateResponse(Response::HTTP_OK);
+        $this->assetRepository->deleteById($id);
+
+        return $this->apiResponseBuilder
+            ->withStatusCode(Response::HTTP_OK)
+            ->build();
     }
 
     public function updateAsset(int $id, Request $request): Response
@@ -78,32 +80,11 @@ class AssetController extends Controller
 
         $dto = new AssetDTO($request->all());
 
-        $x = $this->assetRepository->updatePatchById($id, $dto->toArray());
-        return $this->generateResponse(Response::HTTP_OK, $x->toArray());
-    }
+        $data = $this->assetRepository->updatePatchById($id, $dto->toArray());
 
-    private function generateResponse(
-        int $httpCode, 
-        ?array $httpResponseData = null, 
-        ?string $error = null,
-        $count
-    ): Response
-    {
-        $result = [];
-        // $result['success'] = substr($httpCode, 0, 1) === 2 ? true : false;
-        $result['success'] = true;
-
-        if ($httpResponseData) {
-            $result['data'] = $httpResponseData;
-        }
-
-        if ($error) {
-            $result['error'] = $error;
-        }
-
-        $result['meta']['total'] = $count;
-
-        $json = json_encode($result, JSON_PRETTY_PRINT);
-        return response($json, $httpCode)->header('Content-Type', 'text/javascirpt');
+        return $this->apiResponseBuilder
+            ->withStatusCode(Response::HTTP_OK)
+            ->withData($data->toArray())
+            ->build();
     }
 }
