@@ -32,12 +32,13 @@ class ApiResponseBuilder
     {
         $response = [];
 
-        if (!isset($this->statusCode)) {
+        $statusCode = $this->statusCode;
+        if (!isset($statusCode)) {
             throw new \Exception('Status Code is mandatory, but it was not set');
         }
 
-        if (isset($this->statusCode)) {
-            $response['status'] = (int) substr(strval($this->statusCode), 0,1) === 2 ? 'success' : 'false';
+        if (isset($statusCode)) {
+            $response['status'] = (int) substr(strval($statusCode), 0,1) === 2 ? 'success' : 'false';
         }
 
         if(isset($this->data)) {
@@ -50,7 +51,20 @@ class ApiResponseBuilder
 
         $json = json_encode($response, JSON_PRETTY_PRINT);
 
-        return response($json, $this->statusCode)
+        $this->reset();
+
+        return response($json, $statusCode)
             ->header('Content-Type', 'text/javascirpt');
+    }
+
+    private function reset()
+    {
+        foreach (get_class_vars(get_class($this)) as $name => $default) {
+            if ($default === false) {
+                unset($this->$name);    
+            } else {
+                $this->$name = $default;
+            }
+        }
     }
 }
