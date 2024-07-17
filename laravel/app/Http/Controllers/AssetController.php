@@ -7,12 +7,14 @@ use Illuminate\Http\Response;
 use App\Repository\AssetRepository;
 use Illuminate\Http\RedirectResponse;
 use App\DTO\AssetDTO;
+use App\Http\Response\ApiResponseBuilder;
 
 
 class AssetController extends Controller
 {
     public function __construct(
-        private AssetRepository $assetRepository
+        private AssetRepository $assetRepository,
+        private ApiResponseBuilder $apiResponseBuilder
     )
     {
     }
@@ -25,18 +27,26 @@ class AssetController extends Controller
 
         unset ($params['limit']);
         unset ($params['page']);
-
+        
         $assets = $this->assetRepository->getFiltered(
             $params, $page, $limit
         )->toArray();
 
-        return $this->generateResponse($assets, Response::HTTP_OK);
+        $count = $this->assetRepository->getFilteredCount(
+            $params
+        );
+
+        return $this->apiResponseBuilder
+            ->withStatusCode(Response::HTTP_OK)
+            ->withData($assets)
+            ->withTotalMeta($count)
+            ->build();
     }
 
     public function getAssetById(int $id): Response
     {
         $assets = $this->assetRepository->getById($id)->toArray();
-        return $this->generateResponse($assets, Response::HTTP_OK);
+        return $this->generateResponse(Response::HTTP_OK, $assets);
     }
 
     public function createAsset(Request $request): Response
@@ -51,13 +61,13 @@ class AssetController extends Controller
             $dto->toArray()
         )->toArray();
 
-        return $this->generateResponse($asset, Response::HTTP_OK);
+        return $this->generateResponse(Response::HTTP_OK, $asset);
     }
 
     public function deleteAsset(int $id): Response
     {
         $deleteAsset = $this->assetRepository->deleteById($id);
-        return $this->generateResponse([], Response::HTTP_OK);
+        return $this->generateResponse(Response::HTTP_OK);
     }
 
     public function updateAsset(int $id, Request $request): Response
@@ -69,12 +79,31 @@ class AssetController extends Controller
         $dto = new AssetDTO($request->all());
 
         $x = $this->assetRepository->updatePatchById($id, $dto->toArray());
-        return $this->generateResponse($x->toArray(), Response::HTTP_OK);
+        return $this->generateResponse(Response::HTTP_OK, $x->toArray());
     }
 
-    private function generateResponse(array $array, int $httpCode): Response
+    private function generateResponse(
+        int $httpCode, 
+        ?array $httpResponseData = null, 
+        ?string $error = null,
+        $count
+    ): Response
     {
-        $json = json_encode($array, JSON_PRETTY_PRINT);
+        $result = [];
+        // $result['success'] = substr($httpCode, 0, 1) === 2 ? true : false;
+        $result['success'] = true;
+
+        if ($httpResponseData) {
+            $result['data'] = $httpResponseData;
+        }
+
+        if ($error) {
+            $result['error'] = $error;
+        }
+
+        $result['meta']['total'] = $count;
+
+        $json = json_encode($result, JSON_PRETTY_PRINT);
         return response($json, $httpCode)->header('Content-Type', 'text/javascirpt');
     }
 }
