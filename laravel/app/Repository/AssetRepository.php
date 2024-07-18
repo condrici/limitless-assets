@@ -5,7 +5,6 @@ namespace App\Repository;
 use App\Models\Asset;
 use App\Exceptions\ResourceDoesNotExist;
 use Illuminate\Database\Eloquent\Collection;
-use App\Repository\PaginationTrait;
 
 class AssetRepository
 {
@@ -21,6 +20,11 @@ class AssetRepository
             ->offset($offset)
             ->limit($limit)
             ->get();
+    }
+
+    public function getFilteredCount(array $params): int
+    {
+        return Asset::where($params)->count();
     }
   
     public function getById(int $id): Collection
