@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AssetRepository
 {
+    public function __construct(private Asset $asset)
+    {
+    }
+
     public function getFiltered(
         array $params, 
         int $page,
@@ -16,7 +20,7 @@ class AssetRepository
     {
         $offset = ($page -1) * $limit;
 
-        return Asset::where($params)
+        return $this->asset->where($params)
             ->offset($offset)
             ->limit($limit)
             ->get();
@@ -24,12 +28,12 @@ class AssetRepository
 
     public function getFilteredCount(array $params): int
     {
-        return Asset::where($params)->count();
+        return $this->asset->where($params)->count();
     }
   
     public function getById(int $id): Collection
     {
-        $find = Asset::find($id);
+        $find = $this->asset->find($id);
         if ($find === null) {
             throw new ResourceDoesNotExist("Asset does not exist, nothing to retrieve");
         }
@@ -39,24 +43,24 @@ class AssetRepository
 
     public function create(array $params): Asset
     {
-        return Asset::create($params);
+        return $this->asset->create($params);
     }
     
     public function updatePatchById(int $id, array $params): Asset
     {
-        $asset = Asset::find($id);
+        $asset = $this->asset->find($id);
         if ($asset === null) {
             throw new ResourceDoesNotExist("Asset does not exist, nothing to update");
         }
 
-        Asset::where('id', $id)->update($params);
+        $this->asset->where('id', $id)->update($params);
 
         return $asset->fresh();
     }
 
     public function deleteById(int $id): bool
     {
-        Asset::find($id)?->delete();
+        $this->asset->find($id)?->delete();
 
         return true;
     }
