@@ -79,7 +79,6 @@ class AssetController extends Controller
         ]);
 
         $dto = new AssetDTO($request->all());
-
         $data = $this->assetRepository->updatePatchById($id, $dto->toArray());
 
         return $this->apiResponseBuilder

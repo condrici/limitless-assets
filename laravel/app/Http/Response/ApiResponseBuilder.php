@@ -51,16 +51,7 @@ class ApiResponseBuilder
 
         $json = json_encode($response, JSON_PRETTY_PRINT);
 
-        $this->reset();
-
         return response($json, $statusCode)
             ->header('Content-Type', 'text/javascirpt');
-    }
-
-    private function reset()
-    {
-        foreach (get_class_vars(get_class($this)) as $name => $default) {
-            unset($this->$name);
-        }
     }
 }

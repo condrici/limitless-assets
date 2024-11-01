@@ -20,7 +20,8 @@ class AssetRepository
     {
         $offset = ($page -1) * $limit;
 
-        return $this->asset->where($params)
+        return $this->asset
+            ->where($params)
             ->offset($offset)
             ->limit($limit)
             ->get();
@@ -28,10 +29,12 @@ class AssetRepository
 
     public function getFilteredCount(array $params): int
     {
-        return $this->asset->where($params)->count();
+        return $this->asset
+            ->where($params)
+            ->count();
     }
   
-    public function getById(int $id): Collection
+    public function getById(int $id): Asset
     {
         $find = $this->asset->find($id);
         if ($find === null) {
@@ -43,7 +46,8 @@ class AssetRepository
 
     public function create(array $params): Asset
     {
-        return $this->asset->create($params);
+        return $this->asset
+            ->create($params);
     }
     
     public function updatePatchById(int $id, array $params): Asset
@@ -53,7 +57,9 @@ class AssetRepository
             throw new ResourceDoesNotExist("Asset does not exist, nothing to update");
         }
 
-        $this->asset->where('id', $id)->update($params);
+        $asset
+            ->where('id', $id)
+            ->update($params);
 
         return $asset->fresh();
     }
